@@ -74,10 +74,11 @@ async def seed():
                         )
 
             # Upsert test users and assign roles
+            # OIDs are fake GUIDs matching the real Entra format (36-char UUID)
             test_users = [
-                ("Alice", "dev-alice", "alice@localhost", ["Deposit Tester"]),
-                ("Bob", "dev-bob", "bob@localhost", ["Developer"]),
-                ("Carol", "dev-carol", "carol@localhost", ["Deposit Design", "Developer"]),
+                ("Alice Smith",  "550e8400-e29b-41d4-a716-446655440001", "alice@contoso.onmicrosoft.com",  ["Deposit Tester"]),
+                ("Bob Jones",    "550e8400-e29b-41d4-a716-446655440002", "bob@contoso.onmicrosoft.com",    ["Developer"]),
+                ("Carol White",  "550e8400-e29b-41d4-a716-446655440003", "carol@contoso.onmicrosoft.com",  ["Deposit Design", "Developer"]),
             ]
 
             # Build role lookup
