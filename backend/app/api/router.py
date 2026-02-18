@@ -12,6 +12,6 @@ async def get_me(user: dict = Depends(get_current_user)):
         id=int(user["sub"]),
         email=user["email"],
         full_name=user["full_name"],
-        role=user["role"],
-        permissions=user["permissions"],
+        roles=user["roles"],
+        agents=user["agents"],
     )

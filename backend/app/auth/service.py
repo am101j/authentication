@@ -62,16 +62,16 @@ def mint_app_jwt(
     user_id: int,
     email: str,
     full_name: str,
-    role: str,
-    permissions: list[str],
+    roles: list[str],
+    agents: list[str],
 ) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "email": email,
         "full_name": full_name,
-        "role": role,
-        "permissions": permissions,
+        "roles": roles,
+        "agents": agents,
         "iat": now,
         "exp": now + timedelta(minutes=settings.JWT_EXPIRATION_MINUTES),
     }

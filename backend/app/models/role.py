@@ -10,7 +10,7 @@ class Role(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
-    permissions = relationship(
-        "Permission", secondary="role_permissions", back_populates="roles", lazy="selectin"
+    agents = relationship(
+        "Agent", secondary="role_agents", back_populates="roles", lazy="selectin"
     )
-    users = relationship("User", back_populates="role", lazy="noload")
+    users = relationship("User", secondary="user_roles", back_populates="roles", lazy="noload")

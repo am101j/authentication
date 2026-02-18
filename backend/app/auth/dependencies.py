@@ -14,11 +14,11 @@ async def get_current_user(request: Request) -> dict:
     return payload
 
 
-def require_permission(slug: str):
+def require_agent(slug: str):
     async def dependency(request: Request) -> dict:
         user = await get_current_user(request)
-        permissions = user.get("permissions", [])
-        if slug not in permissions:
-            raise HTTPException(status_code=403, detail=f"Missing permission: {slug}")
+        agents = user.get("agents", [])
+        if slug not in agents:
+            raise HTTPException(status_code=403, detail=f"Missing agent access: {slug}")
         return user
     return dependency

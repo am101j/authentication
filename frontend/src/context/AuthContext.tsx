@@ -11,13 +11,13 @@ import { fetchCurrentUser } from "../api/auth";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  hasPermission: (slug: string) => boolean;
+  hasAgentAccess: (slug: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  hasPermission: () => false,
+  hasAgentAccess: () => false,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -31,13 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const hasPermission = (slug: string): boolean => {
+  const hasAgentAccess = (slug: string): boolean => {
     if (!user) return false;
-    return user.permissions.includes(slug);
+    return user.agents.includes(slug);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, hasPermission }}>
+    <AuthContext.Provider value={{ user, loading, hasAgentAccess }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,21 +4,21 @@ import { useAuth } from "../context/AuthContext";
 
 interface Props {
   children: ReactNode;
-  permission?: string;
+  agent?: string;
 }
 
-export default function ProtectedRoute({ children, permission }: Props) {
-  const { user, loading, hasPermission } = useAuth();
+export default function ProtectedRoute({ children, agent }: Props) {
+  const { user, loading, hasAgentAccess } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading">Loading...</div>;
   }
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (permission && !hasPermission(permission)) {
+  if (agent && !hasAgentAccess(agent)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

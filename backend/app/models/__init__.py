@@ -1,7 +1,8 @@
 from .base import Base
+from .agent import Agent
+from .role_agent import role_agent
+from .user_role import user_role
 from .role import Role
-from .permission import Permission
-from .role_permission import role_permission
 from .user import User
 
-__all__ = ["Base", "Role", "Permission", "role_permission", "User"]
+__all__ = ["Base", "Agent", "role_agent", "user_role", "Role", "User"]

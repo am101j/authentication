@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 import { useAuth } from "../context/AuthContext";
 
 interface Props {
-  claim: string;
+  slug: string;
   children: ReactNode;
   fallback?: ReactNode;
 }
 
-export default function RequirePermission({ claim, children, fallback }: Props) {
-  const { hasPermission } = useAuth();
+export default function RequireAgent({ slug, children, fallback }: Props) {
+  const { hasAgentAccess } = useAuth();
 
-  if (!hasPermission(claim)) {
+  if (!hasAgentAccess(slug)) {
     return fallback ? <>{fallback}</> : null;
   }
 

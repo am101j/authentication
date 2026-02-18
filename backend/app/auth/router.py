@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Request, Response, Depends
+from fastapi import APIRouter, Request, Response, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..database import get_db
-from ..models import User, Role
+from ..models import User
 from . import service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -57,37 +57,57 @@ async def callback(request: Request, db: AsyncSession = Depends(get_db)):
     user = db_result.scalar_one_or_none()
 
     if user is None:
-        # Get Guest role
-        role_result = await db.execute(select(Role).where(Role.name == "Guest"))
-        guest_role = role_result.scalar_one()
+        return RedirectResponse(url=f"{settings.FRONTEND_URL}/login?error=unknown_user")
 
-        user = User(
-            entra_oid=oid,
-            email=email,
-            full_name=full_name,
-            role_id=guest_role.id,
-        )
-        db.add(user)
-        await db.commit()
-        await db.refresh(user)
-
-    # Load role with permissions
-    role_result = await db.execute(select(Role).where(Role.id == user.role_id))
-    role = role_result.scalar_one()
-    permission_slugs = [p.slug for p in role.permissions]
+    # Resolve roles -> agents from ORM relationships
+    role_names = [r.name for r in user.roles]
+    agent_slugs = list({a.slug for r in user.roles for a in r.agents})
 
     token = service.mint_app_jwt(
         user_id=user.id,
         email=user.email,
         full_name=user.full_name,
-        role=role.name,
-        permissions=permission_slugs,
+        roles=role_names,
+        agents=agent_slugs,
     )
 
     response = RedirectResponse(url=settings.FRONTEND_URL, status_code=302)
     # Delete the auth_flow cookie
     response.delete_cookie(key="auth_flow", path="/auth/callback")
     # Set the session token
+    response.set_cookie(
+        key="sso_token",
+        value=token,
+        httponly=True,
+        samesite="lax",
+        max_age=settings.JWT_EXPIRATION_MINUTES * 60,
+        path="/",
+    )
+    return response
+
+
+@router.get("/dev-login")
+async def dev_login(user_id: int, db: AsyncSession = Depends(get_db)):
+    """Dev-only: bypass Entra and log in as a seeded test user."""
+    stmt = select(User).where(User.id == user_id)
+    db_result = await db.execute(stmt)
+    user = db_result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    role_names = [r.name for r in user.roles]
+    agent_slugs = list({a.slug for r in user.roles for a in r.agents})
+
+    token = service.mint_app_jwt(
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        roles=role_names,
+        agents=agent_slugs,
+    )
+
+    response = RedirectResponse(url=settings.FRONTEND_URL, status_code=302)
     response.set_cookie(
         key="sso_token",
         value=token,

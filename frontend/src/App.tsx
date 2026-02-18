@@ -3,7 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
+import AgentsPage from "./pages/AgentsPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 export default function App() {
@@ -18,7 +18,7 @@ export default function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <DashboardPage />
+                <AgentsPage />
               </ProtectedRoute>
             }
           />
