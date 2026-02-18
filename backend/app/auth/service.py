@@ -60,6 +60,7 @@ def deserialize_flow(signed_data: str, max_age: int = 600) -> dict:
 
 def mint_app_jwt(
     user_id: int,
+    entra_oid: str,
     email: str,
     full_name: str,
     roles: list[str],
@@ -68,6 +69,7 @@ def mint_app_jwt(
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
+        "entra_oid": entra_oid,
         "email": email,
         "full_name": full_name,
         "roles": roles,

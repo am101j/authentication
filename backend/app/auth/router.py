@@ -65,6 +65,7 @@ async def callback(request: Request, db: AsyncSession = Depends(get_db)):
 
     token = service.mint_app_jwt(
         user_id=user.id,
+        entra_oid=user.entra_oid,
         email=user.email,
         full_name=user.full_name,
         roles=role_names,
@@ -101,6 +102,7 @@ async def dev_login(user_id: int, db: AsyncSession = Depends(get_db)):
 
     token = service.mint_app_jwt(
         user_id=user.id,
+        entra_oid=user.entra_oid,
         email=user.email,
         full_name=user.full_name,
         roles=role_names,

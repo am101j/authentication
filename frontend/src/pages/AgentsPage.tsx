@@ -23,6 +23,26 @@ export default function AgentsPage() {
         </div>
       )}
 
+      <div className="token-debug">
+        <div className="token-debug-title">Raw Entra identity (what Microsoft gives us)</div>
+        <pre>{JSON.stringify({
+          oid: user?.entra_oid,
+          preferred_username: user?.email,
+          name: user?.full_name,
+        }, null, 2)}</pre>
+      </div>
+
+      <div className="token-debug">
+        <div className="token-debug-title">Resolved session (after looking up roles and agents in our DB)</div>
+        <pre>{JSON.stringify({
+          id: user?.id,
+          email: user?.email,
+          full_name: user?.full_name,
+          roles: user?.roles,
+          agents: user?.agents,
+        }, null, 2)}</pre>
+      </div>
+
       <div className="agents-grid">
         {AGENTS.map((agent) => (
           <RequireAgent key={agent.slug} slug={agent.slug}>

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class TokenPayload(BaseModel):
     sub: str
+    entra_oid: str
     email: str
     full_name: str
     roles: list[str]

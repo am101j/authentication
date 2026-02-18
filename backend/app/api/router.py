@@ -10,6 +10,7 @@ router = APIRouter(prefix="/api", tags=["api"])
 async def get_me(user: dict = Depends(get_current_user)):
     return UserMeResponse(
         id=int(user["sub"]),
+        entra_oid=user["entra_oid"],
         email=user["email"],
         full_name=user["full_name"],
         roles=user["roles"],

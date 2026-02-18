@@ -209,6 +209,32 @@ a:hover {
   margin-bottom: 24px;
 }
 
+/* Token debug panel */
+.token-debug {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.token-debug-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.token-debug pre {
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 /* Loading */
 .loading {
   display: flex;

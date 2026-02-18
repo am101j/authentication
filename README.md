@@ -1,42 +1,53 @@
 # SSO Service
 
-Single Sign-On app with Microsoft Entra ID authentication and role-based access control (RBAC).
+Single Sign-On app with Microsoft Entra ID authentication and role-based agent access control.
 
-**Stack:** FastAPI · React + TypeScript · PostgreSQL · MSAL
+**Stack:** FastAPI · React + TypeScript · SQLite (dev) / PostgreSQL (prod) · MSAL
 
-## Setup
+---
 
-### 1. Prerequisites
+## Running locally (no Docker needed)
+
+### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- Docker
 
-### 2. Start the database
+### 1. Clone the repo
 ```bash
-docker-compose up -d
+git clone <repo-url>
+cd sso
 ```
 
-### 3. Configure environment
-Copy `.env.example` to `backend/.env` and fill in your Microsoft Entra ID credentials:
-```
-ENTRA_CLIENT_ID=your-client-id
-ENTRA_CLIENT_SECRET=your-client-secret
-ENTRA_TENANT_ID=your-tenant-id
-```
-
-### 4. Run the backend
+### 2. Backend setup
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux
 pip install -r requirements.txt
-alembic upgrade head
+```
+
+### 3. Create your .env file
+Create `backend/.env` with the following (for local dev, Entra credentials are optional):
+```
+DATABASE_URL=sqlite+aiosqlite:///./sso.db
+JWT_SECRET=any-random-string-here
+FRONTEND_URL=http://localhost:5173
+```
+
+### 4. Seed the database
+This creates all tables and inserts test users, roles, and agents:
+```bash
 python -m app.seed
-uvicorn app.main:app --reload
+```
+
+### 5. Start the backend
+```bash
+uvicorn app.main:app --reload --port 8000
 ```
 Runs on http://localhost:8000
 
-### 5. Run the frontend
+### 6. Start the frontend (new terminal)
 ```bash
 cd frontend
 npm install
@@ -44,16 +55,58 @@ npm run dev
 ```
 Runs on http://localhost:5173
 
-## How it works
-1. User clicks Login → redirected to Microsoft
-2. Microsoft authenticates → redirects back with identity
-3. Backend creates user (default "Guest" role) or finds existing one
-4. Backend issues a JWT cookie with role + permissions
-5. Frontend reads the JWT to show/hide UI based on permissions
+---
 
-## Roles
-| Role  | Permissions |
-|-------|-------------|
-| Admin | dashboard.view, dashboard.edit, settings.view, settings.edit, users.view, users.manage |
-| User  | dashboard.view, dashboard.edit, settings.view |
-| Guest | dashboard.view |
+## Logging in (dev)
+
+The login page has **Mock Entra** shortcuts — no Microsoft account needed:
+
+| Link | User | Roles | Sees |
+|------|------|-------|------|
+| Alice | alice@localhost | Deposit Tester | Testing Agent |
+| Bob | bob@localhost | Developer | Developer Agent |
+| Carol | carol@localhost | Deposit Design, Developer | Design Agent, Developer Agent |
+
+Or hit directly: `http://localhost:8000/auth/dev-login?user_id=1`
+
+---
+
+## How it works
+
+1. User clicks a dev login link → backend looks up that user in the DB
+2. Backend reads their roles → figures out which agents those roles unlock
+3. Backend creates a signed JWT containing their name, roles, and agents
+4. JWT is stored as a cookie (`sso_token`) in the browser
+5. Frontend calls `/api/user/me` → backend decodes the cookie → returns user info
+6. Frontend shows only the agent cards the user has access to
+
+---
+
+## Roles and agents
+
+| Role | Agent unlocked |
+|------|---------------|
+| Deposit Tester | Testing Agent |
+| Deposit Design | Design Agent |
+| Lending Tester | Testing Agent |
+| Developer | Developer Agent |
+
+---
+
+## Using real Microsoft Entra (production)
+
+Add to `backend/.env`:
+```
+ENTRA_CLIENT_ID=your-client-id
+ENTRA_CLIENT_SECRET=your-client-secret
+ENTRA_TENANT_ID=your-tenant-id
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/sso
+```
+
+Users must be pre-created in the database with their Entra `oid` set. Unknown users are rejected at login.
+
+Run migrations against Postgres:
+```bash
+alembic upgrade head
+python -m app.seed
+```
